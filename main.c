@@ -2,58 +2,72 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-struct Roman {
-    int arabic;
-    char *numeral;
-};
+struct RZYM {
+    int arab;
+    char *rzym;
+}  rz[] = { { 1, "I" }, { 4, "IV" }, { 5, "V" }, { 9, "IX" }, { 10, "X" },
+            { 40, "XL" }, { 50, "L" }, { 90, "XC" }, { 100, "C" },
+            { 400, "CD" }, { 500, "D" }, { 900, "CM" }, { 1000, "M" } };
 
-const struct Roman roman_values[] = {
-        {1, "I"}, {4, "IV"}, {5, "V"}, {9, "IX"}, {10, "X"},
-        {40, "XL"}, {50, "L"}, {90, "XC"}, {100, "C"},
-        {400, "CD"}, {500, "D"}, {900, "CM"}, {1000, "M"}
-};
-
-int roman_to_arabic(const char *roman) {
-    int arabic = 0, i = 0;
-    while (roman[i] != '\0') {
-        int j = 0;
-        while (roman_values[j].numeral[0] != '\0' && roman_values[j].numeral[0] != roman[i]) j++;
-        if (roman_values[j].numeral[1] == roman[i + 1]) {
-            arabic += roman_values[j].arabic;
-            i += 2;
-        } else {
-            arabic += roman_values[j].arabic;
-            i++;
+void convert_to_roman(int num) {
+    int i;
+    while (num > 0) {
+        for (i = 0; i < 13; i++) {
+            if (num < rz[i].arab) {
+                i--;
+                break;
+            }
         }
+        printf("%s", rz[i].rzym);
+        num -= rz[i].arab;
     }
-    return arabic;
-}
-int arabic_to_roman(int arabic) {
-    int i = sizeof(roman_values) / sizeof(roman_values[0]) - 1;
-    while (arabic > 0) {
-        while (arabic >= roman_values[i].arabic) {
-            printf("%s", roman_values[i].numeral);
-            arabic -= roman_values[i].arabic;
-        }
-        i--;
-    }
-    return 0;
 }
 
+int convert_to_arabic(char* num) {
+    int i, sum = 0, prev_value = 0;
+    for (i = 0; num[i]; i++) {
+        int j;
+        for (j = 0; j < 13; j++) {
+            if (num[i] == *rz[j].rzym) {
+                if (prev_value < rz[j].arab) {
+                    sum += rz[j].arab - (2 * prev_value);
+                }
+                else {
+                    sum += rz[j].arab;
+                }
+                prev_value = rz[j].arab;
+                break;
+            }
+        }
+    }
+    return sum;
+}
 
 int main() {
-    char input[100];
-    printf("Enter an Arabic or Roman number: ");
+    char input[20];
+    printf("Enter a number: ");
     scanf("%s", input);
 
     if (isdigit(input[0])) {
-        printf("Roman equivalent: ");
-        arabic_to_roman(strtol(input,NULL,10));
-    } else if (isalpha(input[0])) {
-        printf("Arabic equivalent: %d", roman_to_arabic(input));
-    } else {
-        printf("Invalid number format");
+        int num = atoi(input);
+        if (num > 0 && num < 4000) {
+            convert_to_roman(num);
+        }
+        else {
+            printf("Invalid input! Number must be between 1 and 3999.");
+        }
     }
-
+    else if (isalpha(input[0])) {
+        int num = convert_to_arabic(input);
+        if (num > 0 && num < 4000) {
+            printf("%d", num);
+        }
+        else {
+            printf("Invalid input! Number must be between 1 and 3999.");
+        }
+    }
+    else {
+        printf("Invalid input! Please enter a number.");
+    }
     return 0;
 }
